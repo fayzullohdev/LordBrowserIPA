@@ -8,14 +8,14 @@ workflows:
         script: |
           mkdir -p Payload/LordBrowser.app
           
-          # Swift faylingiz nomi ContentView.swift bo'lsa:
+          # Swift faylni kompilatsiya qilish
           swiftc -sdk $(xcrun --sdk iphoneos --show-sdk-path) \
                  -target arm64-apple-ios15.0 \
                  -emit-executable \
                  -o Payload/LordBrowser.app/LordBrowser \
                  ContentView.swift
                  
-          # Info.plist faylini yaratish
+          # Info.plist yaratish
           cat <<EOF > Payload/LordBrowser.app/Info.plist
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -39,9 +39,7 @@ workflows:
           </plist>
           EOF
           
-          # Payload papkasini zip qilib .ipa hosil qilish
+          # Root papkada .ipa zip fayl hosil qilish
           zip -r LordBrowser.ipa Payload
-          mkdir -p output
-          mv LordBrowser.ipa output/
     artifacts:
-      - output/*.ipagit commit -am "fix yaml"
+      - "*.ipa"
