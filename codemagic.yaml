@@ -1,20 +1,47 @@
 workflows:
   ios-swift-build:
-    name: Build iOS IPA
+    name: Build Unsigned iOS IPA
     max_build_duration: 30
     instance_type: mac_mini_m1
-    environment:
-      ios_signing:
-        distribution_type: ad_hoc
-      vars:
-        XCODE_WORKSPACE: "YourProject.xcworkspace" # Agar workspace bo'lmasa, pastdagi project'ni ishlatadi
-        XCODE_PROJECT: "YourProject.xcodeproj"
-        XCODE_SCHEME: "YourProject"
     scripts:
-      - name: Set up build environment
+      - name: Compile Swift File to IPA
         script: |
-          xcode-project build-ipa \
-            --project "$XCODE_PROJECT" \
-            --scheme "$XCODE_SCHEME"
+          mkdir -p Payload/LordBrowser.app
+          
+          # Swift faylingiz nomi ContentView.swift bo'lsa:
+          swiftc -sdk $(xcrun --sdk iphoneos --show-sdk-path) \
+                 -target arm64-apple-ios15.0 \
+                 -emit-executable \
+                 -o Payload/LordBrowser.app/LordBrowser \
+                 ContentView.swift
+                 
+          # Info.plist faylini yaratish
+          cat <<EOF > Payload/LordBrowser.app/Info.plist
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>CFBundleExecutable</key>
+              <string>LordBrowser</string>
+              <key>CFBundleIdentifier</key>
+              <string>com.fayzulloh.lordbrowser</string>
+              <key>CFBundleName</key>
+              <string>LordBrowser</string>
+              <key>CFBundlePackageType</key>
+              <string>APPL</string>
+              <key>CFBundleShortVersionString</key>
+              <string>1.0</string>
+              <key>CFBundleVersion</key>
+              <string>1</string>
+              <key>MinimumOSVersion</key>
+              <string>15.0</string>
+          </dict>
+          </plist>
+          EOF
+          
+          # Payload papkasini zip qilib .ipa hosil qilish
+          zip -r LordBrowser.ipa Payload
+          mkdir -p output
+          mv LordBrowser.ipa output/
     artifacts:
-      - build/ios/ipa/*.ipa
+      - output/*.ipagit commit -am "fix yaml"
