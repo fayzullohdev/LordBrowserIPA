@@ -1,0 +1,20 @@
+workflows:
+  ios-swift-build:
+    name: Build iOS IPA
+    max_build_duration: 30
+    instance_type: mac_mini_m1
+    environment:
+      ios_signing:
+        distribution_type: ad_hoc
+      vars:
+        XCODE_WORKSPACE: "YourProject.xcworkspace" # Agar workspace bo'lmasa, pastdagi project'ni ishlatadi
+        XCODE_PROJECT: "YourProject.xcodeproj"
+        XCODE_SCHEME: "YourProject"
+    scripts:
+      - name: Set up build environment
+        script: |
+          xcode-project build-ipa \
+            --project "$XCODE_PROJECT" \
+            --scheme "$XCODE_SCHEME"
+    artifacts:
+      - build/ios/ipa/*.ipa
